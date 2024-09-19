@@ -1,12 +1,13 @@
-import { Schema, type, MapSchema } from "@colyseus/schema";
+import { Schema, type, MapSchema, ArraySchema } from "@colyseus/schema";
 import { XYZState } from "./xyz";
+import { PlayerRole } from "../abstract/types";
 
 export class Player extends Schema {
   //
   @type("string") sessionId: string = "";
   @type("string") userId: string = "";
   @type("string") name: string = "";
-  @type("string") role: string = "player";
+  @type("string") role: PlayerRole = "player";
   @type("number") latency: number = 0;
   @type("number") jitter: number = 0;
   @type(XYZState) position: XYZState = new XYZState();
@@ -16,4 +17,5 @@ export class Player extends Schema {
   @type("number") scale: number = 1;
   @type("string") text: string = "";
   @type("string") state: string = "";
+  @type("string") plugins = "";
 }

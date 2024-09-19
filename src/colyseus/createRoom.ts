@@ -1,13 +1,13 @@
 import type { IncomingMessage } from "http";
 import { Room, Client, logger } from "@colyseus/core";
-import { GameRoom, CYBER_MSG } from "@oogg/game-server-colyseus";
+import { CYBER_MSG } from "../cyber/abstract/types";
 
 const defaults = {
   PATCH_RATE: 1000 / 20,
   TICK_RATE: 1000 / 30,
 };
 
-export function createGameServer(RoomHandler) {
+export function createGameRoom(RoomHandler) {
   //
   return class GameServer extends Room {
     //
@@ -17,6 +17,10 @@ export function createGameServer(RoomHandler) {
 
     private _logger = logger;
 
+    patchRate = this._room.patchRate ?? defaults.PATCH_RATE;
+
+    maxClients = this._room.maxPlayers ?? 500;
+
     // tickRate = this._room.tickRate ?? defaults.TICK_RATE;
 
     constructor(...args) {
@@ -25,8 +29,6 @@ export function createGameServer(RoomHandler) {
       // this.setSimulationInterval(() => {
       //     this._room._CALLBACKS_.tick();
       // }, this.tickRate);
-
-      this.setPatchRate(this._room.patchRate ?? defaults.PATCH_RATE);
 
       this.setState(this._room.state);
 
@@ -130,7 +132,7 @@ export function createGameServer(RoomHandler) {
       //
       this._logger.info("Room disposed");
 
-      // this._room._CALLBACKS_.shutdown();
+      this._room._CALLBACKS_.shutdown();
     }
 
     private _onCyberMsg = (client: Client, message: any) => {

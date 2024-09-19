@@ -1,19 +1,16 @@
 import config from "@colyseus/tools";
 import { monitor } from "@colyseus/monitor";
 import { playground } from "@colyseus/playground";
-
-/**
- * Import your Room files
- */
-import { CyberRoom } from "./rooms/CyberRoom";
-import { createGameServer } from "./rooms/createRoom";
+import { rooms } from "./rooms";
 
 export default config({
   initializeGameServer: (gameServer) => {
     /**
      * Define your room handlers:
      */
-    gameServer.define("cyber-room", createGameServer(CyberRoom));
+    Object.keys(rooms).forEach((key) => {
+      gameServer.define(key, rooms[key]);
+    });
   },
 
   initializeExpress: (app) => {

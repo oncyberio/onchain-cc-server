@@ -11,12 +11,7 @@
     "experimentalDecorators": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "useDefineForClassFields": false,
-    "paths": {
-      "@oogg/game-server-colyseus": [
-        "../../oo.gg/packages/game-server/dist/index.js"
-      ]
-    }
+    "useDefineForClassFields": false
   },
   "include": ["src"]
 }
