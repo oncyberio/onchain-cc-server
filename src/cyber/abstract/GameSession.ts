@@ -8,8 +8,11 @@ import {
   GameActions,
   ClientMessage,
   PlayerData,
+  PingMsg,
+  PongMsg,
 } from "./types";
 import { RoomState } from "../schema/RoomState";
+import { calcLatencyIPDTV } from "./utils";
 
 const defaults = {
   PATCH_RATE: 1000 / 20, // 50ms, 20fps
@@ -140,119 +143,111 @@ export abstract class GameSession<
 
   private _autoInc = 1;
 
-  /*
-    _PING_ = {
-        _timeouts: {} as Record<string, NodeJS.Timeout>,
+  _PING_ = {
+    _timeouts: {} as Record<string, NodeJS.Timeout>,
 
-        _LATENCY_BUFFER_SIZE: 10,
+    _LATENCY_BUFFER_SIZE: 10,
 
-        // buffer of last pings
-        _latencyBuffer: {} as Record<string, number[]>,
+    // buffer of last pings
+    _latencyBuffer: {} as Record<string, number[]>,
 
-        _clearPingLoop: (sessionId: string) => {
-            const timeout = this._PING_._timeouts[sessionId];
+    _clearPingLoop: (sessionId: string) => {
+      const timeout = this._PING_._timeouts[sessionId];
 
-            if (timeout) {
-                delete this._PING_._timeouts[sessionId];
+      if (timeout) {
+        delete this._PING_._timeouts[sessionId];
 
-                clearTimeout(timeout);
-            }
-        },
+        clearTimeout(timeout);
+      }
+    },
 
-        _clearAllPingLoops: () => {
-            Object.values(this._PING_._timeouts).forEach((timeout) => {
-                this._PING_._clearPingLoop(timeout.toString());
-            });
-        },
+    _clearAllPingLoops: () => {
+      Object.values(this._PING_._timeouts).forEach((timeout) => {
+        this._PING_._clearPingLoop(timeout.toString());
+      });
+    },
 
-        _pingLoop: (sessionId: string) => {
-            const playerData = this.state.players.get(sessionId);
+    _pingLoop: (sessionId: string) => {
+      //
+      const playerData = this._getPlayer(sessionId);
 
-            if (playerData == null) {
-                console.error("[_pingLoop] player not found", sessionId);
-                return;
-            }
+      if (playerData == null) {
+        return;
+      }
 
-            let pingInterval =
-                this._gameLoop.status === "running" ? this.pingInterval : 1000;
+      let pingInterval = this._gameLoop.isRunning ? this.pingInterval : 1000;
 
-            this._PING_._sendPing(playerData);
+      this._PING_._sendPing(playerData);
 
-            this._PING_._timeouts[sessionId] = setTimeout(() => {
-                //
-                this._PING_._pingLoop(sessionId);
-            }, pingInterval);
-        },
+      this._PING_._timeouts[sessionId] = setTimeout(() => {
+        //
+        this._PING_._pingLoop(sessionId);
+      }, pingInterval);
+    },
 
-        _sendPing: async (playerData: PlayerData) => {
-            const pingId = this._autoInc++;
+    _sendPing: async (playerData: PlayerData) => {
+      //
+      const pingId = this._autoInc++;
 
-            this._pendingPings[pingId] = {
-                time: Date.now(),
-                sessionId: playerData.sessionId,
-            };
+      this._pendingPings[pingId] = {
+        time: Date.now(),
+        sessionId: playerData.sessionId,
+      };
 
-            if (this.showLogs) {
-                console.log("ping", pingId, playerData.sessionId);
-            }
+      if (this.showLogs) {
+        console.log("ping", pingId, playerData.sessionId);
+      }
 
-            this.ctx.sendMsg(
-                { type: "ping", data: pingId },
-                playerData.sessionId
-            );
-        },
+      this.ctx.sendMsg(
+        { type: Messages.PING, data: pingId },
+        playerData.sessionId
+      );
+    },
 
-        _onPong: (msg: any, sessionId: string) => {
-            const { data: pingId } = msg;
+    _onPong: (msg: PongMsg, sessionId: string) => {
+      //
+      const pingId = msg.data;
 
-            const pending = this._pendingPings[pingId];
+      const pending = this._pendingPings[pingId];
 
-            if (pending == null || pending.sessionId !== sessionId) {
-                console.error("No pending ping for player", sessionId);
-                return;
-            }
+      if (pending == null || pending.sessionId !== sessionId) {
+        console.error("No pending ping for player", sessionId);
+        return;
+      }
 
-            const playerData = this.state.players.get(sessionId);
+      const playerData = this._getPlayer(sessionId);
 
-            if (playerData == null) {
-                console.error("[_onPong] Player not found", sessionId);
-                return;
-            }
+      if (playerData == null) {
+        return;
+      }
 
-            // add to latency buffer
-            let buffer = this._PING_._latencyBuffer[sessionId];
+      // add to latency buffer
+      let buffer = this._PING_._latencyBuffer[sessionId];
 
-            if (buffer == null) {
-                buffer = this._PING_._latencyBuffer[sessionId] = [];
-            }
+      if (buffer == null) {
+        buffer = this._PING_._latencyBuffer[sessionId] = [];
+      }
 
-            buffer.push((Date.now() - pending.time) / 2);
+      buffer.push((Date.now() - pending.time) / 2);
 
-            if (buffer.length > this._PING_._LATENCY_BUFFER_SIZE) {
-                buffer.shift();
-            }
+      if (buffer.length > this._PING_._LATENCY_BUFFER_SIZE) {
+        buffer.shift();
+      }
 
-            const { latency, jitter } = calcLatencyIPDTV(buffer);
+      const { latency, jitter } = calcLatencyIPDTV(buffer);
 
-            playerData.latency = latency;
-            playerData.jitter = jitter;
+      playerData.latency = latency;
+      playerData.jitter = jitter;
 
-            // playerData.latency = (Date.now() - pending.time) / 2;
+      // playerData.latency = (Date.now() - pending.time) / 2;
 
-            delete this._pendingPings[playerData.sessionId];
+      delete this._pendingPings[playerData.sessionId];
 
-            if (this.showLogs) {
-                console.log(
-                    "pong",
-                    pingId,
-                    playerData.sessionId,
-                    latency,
-                    jitter
-                );
-            }
-        },
-    };
-    */
+      if (this.showLogs) {
+        console.log("pong", pingId, playerData.sessionId, latency, jitter);
+      }
+    },
+  };
 
   private _getPlayer(sessionId: string) {
     //
@@ -366,18 +361,10 @@ export abstract class GameSession<
       this.state.timestamp = Date.now();
     },
 
-    debug: (data) => {
-      //
-      this.onDebug(data);
-    },
-
     message: (message: any, sessionId: string) => {
-      //
-      if (message.type === "debug") {
-        //
-        this._CALLBACKS_.debug(message.data);
-        //
-      } else if (message.type === "pong") {
+      // compat for broadcast/send messages
+      // that were sent as GAME_MESSAGE type
+      if (message.type === Messages.PING) {
         //
         // this._PING_._onPong(message, sessionId);
         //
@@ -393,8 +380,38 @@ export abstract class GameSession<
         }
 
         // this.logInfo("message", message, msg.type, msg.type == ClientProtocol.GAME_REQUEST)
+        if (msg.type == Messages.PLAYER_STATE) {
+          // player state message
+          const [
+            posX,
+            posY,
+            posZ,
+            rotX,
+            rotY,
+            rotZ,
+            animation,
+            scale,
+            vrmUrl,
+            text,
+          ] = msg.data;
 
-        if (msg.type == Messages.GAME_MESSAGE) {
+          player.position.copy({
+            x: posX ?? 0,
+            y: posY ?? 0,
+            z: posZ ?? 0,
+          });
+
+          player.rotation.copy({
+            x: rotX ?? 0,
+            y: rotY ?? 0,
+            z: rotZ ?? 0,
+          });
+
+          player.animation = animation ?? "idle";
+          player.vrmUrl = vrmUrl ?? "";
+          player.scale = scale ?? 1;
+          player.text = text ?? "";
+        } else if (msg.type == Messages.GAME_MESSAGE) {
           this.onMessage?.(msg.data, player);
 
           // this.broadcastMsg({ type: "state", state: this.room.state })
@@ -404,6 +421,14 @@ export abstract class GameSession<
             case GameActions.START:
               this.onRequestStart(msg.data);
               break;
+          }
+        } else if (msg.type == Messages.BROADCAST) {
+          //
+          this.broadcast(msg.data, msg.exclude);
+        } else if (msg.type == Messages.SEND_DM) {
+          //
+          if (this.state.players.has(message.playerId)) {
+            this.send(message, message.playerId);
           }
         }
       }
@@ -464,8 +489,6 @@ export abstract class GameSession<
       throw e;
     }
   }
-
-  onDebug(data: any) {}
 
   async onPreload() {}
 

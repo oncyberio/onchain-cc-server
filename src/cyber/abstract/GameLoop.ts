@@ -26,6 +26,10 @@ export class GameLoop {
     this.onTick = opts.callback ?? noop;
   }
 
+  get isRunning() {
+    return this.status === "running";
+  }
+
   get tickRate() {
     return this._tickRate;
   }

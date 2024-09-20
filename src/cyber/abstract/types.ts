@@ -25,7 +25,7 @@ export interface PlayerData {
   animation: string;
 }
 
-export const CYBER_MSG = "@cyber/msg";
+export const CYBER_MSG = 1000;
 
 export const GameActions = {
   START: 1,
@@ -40,8 +40,17 @@ export enum Messages {
   ROOM_MESSAGE = 1102,
 
   // client -> server
-  GAME_MESSAGE = 100,
-  GAME_REQUEST = 101,
+  GAME_MESSAGE = 1201,
+  GAME_REQUEST = 1202,
+
+  // client -> server (room)
+  PLAYER_STATE = 1301,
+  BROADCAST = 1302,
+  SEND_DM = 1303,
+
+  // ping
+  PING = 1001,
+  PONG = 1002,
 }
 
 export interface GameActionMessage {
@@ -55,7 +64,12 @@ export interface RoomMessage<RM> {
   data: RM;
 }
 
-export type ServerMessage<RM> = GameActionMessage | RoomMessage<RM>;
+export interface PingMsg {
+  type: Messages.PING;
+  data: number;
+}
+
+export type ServerMessage<RM> = GameActionMessage | RoomMessage<RM> | PingMsg;
 
 export interface PlayerMessage<M> {
   type: Messages.GAME_MESSAGE;
@@ -68,11 +82,55 @@ export interface GameRequest {
   data?: any;
 }
 
-export type ClientMessage<M> = PlayerMessage<M> | GameRequest;
+export interface PlayerStateMsg {
+  type: Messages.PLAYER_STATE;
+  data: [
+    posX: number,
+    posY: number,
+    posZ: number,
+    rotX: number,
+    rotY: number,
+    rotZ: number,
+    animation: string,
+    scale: number,
+    vrmUrl: string,
+    text: string
+  ];
+}
+
+export interface BroadcastMsg {
+  type: Messages.BROADCAST;
+  data: any;
+  exclude?: string[];
+}
+
+export interface SendDMMsg {
+  type: Messages.SEND_DM;
+  playerId: string;
+  data: any;
+}
+
+export interface PongMsg {
+  type: Messages.PING;
+  data: number;
+}
+
+export type ClientMessage<M> =
+  | PlayerMessage<M>
+  | GameRequest
+  | PlayerStateMsg
+  | BroadcastMsg
+  | SendDMMsg
+  | PongMsg;
 
 export interface BaseRoomState extends Schema {
   snapshotId: string;
   timestamp: number;
+  settings: {
+    tickRate: number;
+    patchRate: number;
+    reconnectTimeout: number;
+  };
   players: MapSchema<PlayerData>;
 
   addPlayer(player: PlayerData): void;
