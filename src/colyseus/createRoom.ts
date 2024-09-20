@@ -5,6 +5,7 @@ import { CYBER_MSG } from "../cyber/abstract/types";
 const defaults = {
   PATCH_RATE: 1000 / 20,
   TICK_RATE: 1000 / 30,
+  MAX_PLAYERS: 200,
 };
 
 export function createGameRoom(RoomHandler) {
@@ -19,7 +20,10 @@ export function createGameRoom(RoomHandler) {
 
     patchRate = this._room.patchRate ?? defaults.PATCH_RATE;
 
-    maxClients = this._room.maxPlayers ?? 500;
+    maxClients = Math.min(
+      this._room.maxPlayers ?? defaults.MAX_PLAYERS,
+      defaults.MAX_PLAYERS
+    );
 
     // tickRate = this._room.tickRate ?? defaults.TICK_RATE;
 
@@ -76,11 +80,18 @@ export function createGameRoom(RoomHandler) {
 
     async onCreate(opts: any) {
       try {
-        this._gameId = opts.gameId ?? "anon-game";
+        this._gameId =
+          opts.gameId ?? "anon-" + Math.random().toString(36).substr(2, 9);
 
         this._logger.info("Creating Room for game", this._gameId);
 
+        this.setMetadata({
+          gameId: this._gameId,
+          name: opts.gameName ?? "-",
+        });
+
         await this._room._CALLBACKS_.start();
+        //
       } catch (err) {
         this._logger.error(err);
       }
