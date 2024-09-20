@@ -7,6 +7,8 @@ export class CyberGame extends GameSession<RoomState> {
   //
   maxPlayers = 4;
 
+  reconnectTimeout = 10000;
+
   state = new RoomState();
 
   async onPreload() {

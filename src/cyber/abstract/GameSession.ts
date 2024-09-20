@@ -45,6 +45,8 @@ export abstract class GameSession<
 
   joinAfterStart = true;
 
+  reconnectTimeout = 0;
+
   showLogs = false;
 
   constructor(private ctx: GameRoomCtx) {}
@@ -252,6 +254,17 @@ export abstract class GameSession<
     };
     */
 
+  private _getPlayer(sessionId: string) {
+    //
+    const player = this.state.players.get(sessionId);
+
+    if (player == null) {
+      console.error("Player not found", sessionId);
+    }
+
+    return player;
+  }
+
   /**
    * internal callbacks
    */
@@ -264,8 +277,9 @@ export abstract class GameSession<
 
       this._gameLoop.tickRate = tickRate;
 
-      this.state.tickRate = tickRate;
-      this.state.patchRate = patchRate;
+      this.state.settings.reconnectTimeout = this.reconnectTimeout;
+      this.state.settings.tickRate = tickRate;
+      this.state.settings.patchRate = patchRate;
 
       if (typeof this.constructor.prototype.onUpdate === "function") {
         this._gameLoop.onTick = this._CALLBACKS_.tick;
@@ -282,6 +296,26 @@ export abstract class GameSession<
       // this._PING_._pingLoop(playerData.sessionId);
       if (this.showLogs) {
         console.log("player joined", playerData.sessionId);
+      }
+    },
+
+    disconnect: (sessionId: string) => {
+      //
+      const player = this._getPlayer(sessionId);
+
+      if (player != null) {
+        player.connected = false;
+      }
+
+      return this.reconnectTimeout;
+    },
+
+    reconnect: (sessionId: string) => {
+      //
+      const player = this._getPlayer(sessionId);
+
+      if (player != null) {
+        player.connected = true;
       }
     },
 

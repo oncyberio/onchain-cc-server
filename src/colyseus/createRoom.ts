@@ -120,17 +120,49 @@ export function createGameRoom(RoomHandler) {
       });
     }
 
-    onLeave(client: Client, consented: boolean): void | Promise<void> {
+    async onLeave(client: Client, consented: boolean) {
       //
-      this._logger.info("Connection Closed: id", client.sessionId);
+      try {
+        //
+        //
+        this._logger.info("Disconnected: id", client.sessionId, consented);
 
-      if (this.clients.length === 0) {
-        this._logger.info("No more connections, closing room");
+        if (consented) {
+          //
+          throw new Error("Consented leave");
+        }
 
-        // this._room._CALLBACKS_.shutdown();
+        const reconnectTimeout = this._room._CALLBACKS_.disconnect(
+          client.sessionId
+        );
+
+        if (!reconnectTimeout) {
+          console.error("No timeout, leaving");
+          throw new Error("No timeout");
+        }
+
+        this._logger.info(
+          "Client has disconnected, waiting for reconnection in ",
+          reconnectTimeout / 1000,
+          "seconds",
+          client.sessionId
+        );
+
+        await this.allowReconnection(client, reconnectTimeout / 1000);
+
+        this._logger.info("Client has reconnected", client.sessionId);
+
+        this._room._CALLBACKS_.reconnect(client.sessionId);
+      } catch (err) {
+        //
+        this._room._CALLBACKS_.leave(client.sessionId);
+
+        if (this.clients.length === 0) {
+          this._logger.info("No more connections, closing room");
+
+          // this._room._CALLBACKS_.shutdown();
+        }
       }
-
-      this._room._CALLBACKS_.leave(client.sessionId);
     }
 
     onDispose(): void | Promise<any> {

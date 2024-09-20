@@ -18,4 +18,6 @@ export class Player extends Schema {
   @type("string") text: string = "";
   @type("string") state: string = "";
   @type("string") plugins = "";
+
+  @type("boolean") connected: boolean = false;
 }

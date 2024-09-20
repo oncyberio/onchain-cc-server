@@ -2,6 +2,12 @@ import { Schema, type, MapSchema } from "@colyseus/schema";
 import { Player } from "./Player";
 import { GameTimer } from "./GameTimer";
 
+class RoomSettings extends Schema {
+  @type("number") reconnectTimeout = 0;
+  @type("number") patchRate = 20;
+  @type("number") tickRate = 20;
+}
+
 export class RoomState extends Schema {
   //
   @type("string") snapshotId: string = null;
@@ -10,8 +16,7 @@ export class RoomState extends Schema {
 
   @type(GameTimer) timer: GameTimer = new GameTimer();
 
-  @type("number") tickRate = 20;
-  @type("number") patchRate = 20;
+  @type(RoomSettings) settings = new RoomSettings();
 
   addPlayer(data: any) {
     const player = new Player();
@@ -25,6 +30,8 @@ export class RoomState extends Schema {
     player.animation = data.animation;
     player.text = data.text ?? "";
     player.state = data.state ?? "";
+
+    player.connected = true;
 
     this.players.set(data.sessionId, player);
     // console.log("added player", player.toJSON());
