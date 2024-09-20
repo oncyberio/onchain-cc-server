@@ -35,6 +35,12 @@ export class CyberGame extends GameSession<RoomState> {
          *
          * Sync the player state, in case the game uses a state based sync mode
          */
+        console.log(
+          "player-state",
+          player.sessionId,
+          message.data[0],
+          message.data[2]
+        );
         const [
           posX,
           posY,

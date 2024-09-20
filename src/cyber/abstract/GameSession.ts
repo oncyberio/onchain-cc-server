@@ -326,6 +326,12 @@ export abstract class GameSession<
       this.onUpdate(dt);
     },
 
+    beforePatch: () => {
+      //
+      this.state.snapshotId = Math.random().toString(36).substring(2, 7);
+      this.state.timestamp = Date.now();
+    },
+
     debug: (data) => {
       //
       this.onDebug(data);

@@ -99,6 +99,11 @@ export function createGameRoom(RoomHandler) {
       }
     }
 
+    onBeforePatch(state: any) {
+      //
+      this._room._CALLBACKS_.beforePatch(state);
+    }
+
     async onJoin(client: Client, options: any, auth: any) {
       // A websocket just connected!
 

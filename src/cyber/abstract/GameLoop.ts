@@ -75,8 +75,6 @@ export class GameLoop {
   }
 
   private tick = () => {
-    console.log("tick");
-
     const now = Date.now();
     this.deltaTime = now - this.currentTime;
     this.deltaSecs = this.deltaTime / 1000;
