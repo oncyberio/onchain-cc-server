@@ -1,6 +1,3 @@
-// tick rate is the number of times per second the game loop will run
-export const DEFAULT_TICK_RATE = 60;
-
 export type GameLoopCallback = (delta: number) => void;
 
 const noop = () => {};
@@ -15,9 +12,7 @@ export class GameLoop {
 
   private iv: any = null;
 
-  private _tickRate: number = DEFAULT_TICK_RATE;
-
-  public simulatedLatency: number = 0;
+  private _tickRate: number = 1000 / 30; // 30fps, 33.33ms
 
   public onTick: GameLoopCallback = noop;
 
@@ -27,7 +22,7 @@ export class GameLoop {
       callback?: GameLoopCallback;
     } = {}
   ) {
-    this._tickRate = opts.tickRate ?? DEFAULT_TICK_RATE;
+    this._tickRate = opts.tickRate ?? this._tickRate;
     this.onTick = opts.callback ?? noop;
   }
 
@@ -36,7 +31,7 @@ export class GameLoop {
   }
 
   set tickRate(rate: number) {
-    this._tickRate = rate ?? DEFAULT_TICK_RATE;
+    this._tickRate = rate ?? this._tickRate;
     if (this.status === "running") {
       this.stop();
       this.start();

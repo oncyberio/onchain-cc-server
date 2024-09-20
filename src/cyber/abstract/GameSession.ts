@@ -1,5 +1,5 @@
 import { type IncomingMessage } from "http";
-import { DEFAULT_TICK_RATE, GameLoop } from "./GameLoop";
+import { GameLoop } from "./GameLoop";
 import {
   PLAYER_ROLES,
   PlayerRole,
@@ -10,6 +10,11 @@ import {
   PlayerData,
 } from "./types";
 import { RoomState } from "../schema/RoomState";
+
+const defaults = {
+  PATCH_RATE: 1000 / 20, // 50ms, 20fps
+  TICK_RATE: 1000 / 30, // 33ms, 30fps
+};
 
 export interface GameRoomCtx {
   gameId: string;
@@ -63,6 +68,13 @@ export abstract class GameSession<
   }
 
   broadcast(msg: RoomMsg, except?: string[]) {
+    //
+    if (except && !isArrayOfStrings(except)) {
+      //
+      console.error("invalid exclude argument");
+      return;
+    }
+
     this.ctx.broadcastMsg(
       {
         type: Messages.ROOM_MESSAGE,
@@ -246,7 +258,15 @@ export abstract class GameSession<
   _CALLBACKS_ = {
     start: async () => {
       await this.onPreload();
-      this._gameLoop.tickRate = this.tickRate ?? DEFAULT_TICK_RATE;
+
+      const tickRate = this.tickRate ?? defaults.TICK_RATE;
+      const patchRate = this.patchRate ?? defaults.PATCH_RATE;
+
+      this._gameLoop.tickRate = tickRate;
+
+      this.state.tickRate = tickRate;
+      this.state.patchRate = patchRate;
+
       if (typeof this.constructor.prototype.onUpdate === "function") {
         this._gameLoop.onTick = this._CALLBACKS_.tick;
       }
@@ -313,7 +333,6 @@ export abstract class GameSession<
 
     message: (message: any, sessionId: string) => {
       //
-      console.log("message", message);
       if (message.type === "debug") {
         //
         this._CALLBACKS_.debug(message.data);
@@ -425,4 +444,11 @@ export abstract class GameSession<
   onUpdate(dt: number) {}
 
   onDispose() {}
+}
+
+function isArrayOfStrings(exclude) {
+  return (
+    Array.isArray(exclude) &&
+    exclude.every((element) => typeof element === "string")
+  );
 }

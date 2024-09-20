@@ -10,6 +10,9 @@ export class RoomState extends Schema {
 
   @type(GameTimer) timer: GameTimer = new GameTimer();
 
+  @type("number") tickRate = 20;
+  @type("number") patchRate = 20;
+
   addPlayer(data: any) {
     const player = new Player();
     player.sessionId = data.sessionId;
