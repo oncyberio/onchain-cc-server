@@ -6,6 +6,7 @@ import { playground } from "@colyseus/playground";
 import { monitor } from "@colyseus/monitor";
 import basicAuth from "express-basic-auth";
 import { Mutex } from "async-mutex";
+import { GameApi } from "../cyber/abstract/GameApi";
 
 const mutex = new Mutex();
 
@@ -54,6 +55,7 @@ export function initializeExpress(app: any) {
   app.post("/join", async (req: Request, res: Response) => {
     try {
       await mutex.runExclusive(async () => {
+        //
         let { type } = req.query;
 
         if (!type) type = "cyber-game";
@@ -85,6 +87,7 @@ export function initializeExpress(app: any) {
 
           if (room) {
             console.log("/join existing", {
+              gameId: req.body.gameId,
               userId: req.body.userId,
               username: req.body.username,
               roomType: type as string,
@@ -93,13 +96,24 @@ export function initializeExpress(app: any) {
             reservation = await matchMaker.joinById(room.roomId, req.body, {});
             //
           } else {
-            console.log("/join new", {
+            const roomOpts = {
+              gameId: req.body.gameId,
               userId: req.body.userId,
               username: req.body.username,
               roomType: type as string,
+              gameData: null,
+            };
+
+            console.log("/join new", roomOpts);
+
+            const gameData = await GameApi.loadGameData({
+              id: req.body.gameId,
+              draft: true,
             });
 
-            reservation = await matchMaker.create(type as string, req.body, {});
+            roomOpts.gameData = gameData;
+
+            reservation = await matchMaker.create(type as string, roomOpts, {});
           }
 
           res.json({

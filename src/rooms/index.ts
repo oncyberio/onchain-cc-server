@@ -1,5 +1,5 @@
-import { CyberGameRoom } from "./CyberGame";
+import { ColyseusGameRoom } from "./ColyseusGameRoom";
 
 export const rooms = {
-  "cyber-game": CyberGameRoom,
+  "cyber-game": ColyseusGameRoom,
 };

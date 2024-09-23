@@ -2,7 +2,7 @@ import { Schema, type, MapSchema, ArraySchema } from "@colyseus/schema";
 import { XYZState } from "./xyz";
 import { PlayerRole } from "../abstract/types";
 
-export class Player extends Schema {
+export class PlayerState extends Schema {
   //
   @type("string") sessionId: string = "";
   @type("string") userId: string = "";

@@ -1,5 +1,5 @@
 import { Schema, type, MapSchema } from "@colyseus/schema";
-import { Player } from "./Player";
+import { PlayerState } from "./PlayerState";
 import { GameTimer } from "./GameTimer";
 
 class RoomSettings extends Schema {
@@ -12,14 +12,14 @@ export class RoomState extends Schema {
   //
   @type("string") snapshotId: string = null;
   @type("number") timestamp: number = 0;
-  @type({ map: Player }) players = new MapSchema<Player>();
+  @type({ map: PlayerState }) players = new MapSchema<PlayerState>();
 
   @type(GameTimer) timer: GameTimer = new GameTimer();
 
   @type(RoomSettings) settings = new RoomSettings();
 
   addPlayer(data: any) {
-    const player = new Player();
+    const player = new PlayerState();
     player.sessionId = data.sessionId;
     player.userId = data.userId ?? "anon";
     player.name = data.name ?? "Anonymous";

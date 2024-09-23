@@ -1,9 +1,6 @@
-import { RoomState } from "../cyber/schema/RoomState";
-import { GameSession } from "../cyber/abstract/GameSession";
-import { createGameRoom } from "../colyseus/createRoom";
-import { Player } from "../cyber/schema/Player";
+import { RoomState, GameSession, PlayerState } from "../cyber";
 
-export class CyberGame extends GameSession<RoomState> {
+export class DefaultCyberGame extends GameSession<RoomState> {
   //
   maxPlayers = 4;
 
@@ -28,7 +25,7 @@ export class CyberGame extends GameSession<RoomState> {
     console.log(player.sessionId, player.userId, "left!");
   }
 
-  onMessage(message: any, player: Player): void {}
+  onMessage(message: any, player: PlayerState): void {}
 
   // onUpdate(dt: number): void {
   //   console.log("updating...");
@@ -42,5 +39,3 @@ export class CyberGame extends GameSession<RoomState> {
     console.log("disposing...");
   }
 }
-
-export const CyberGameRoom = createGameRoom(CyberGame);
