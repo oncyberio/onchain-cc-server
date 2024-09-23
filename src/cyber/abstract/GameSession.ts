@@ -446,7 +446,7 @@ export abstract class GameSession<
     //
     let id = params["id"];
     let userId = params["userId"] ?? "anon";
-    let name = params["name"] ?? "Anonymous";
+    let name = params["username"] ?? "Anonymous";
     let avatarUrl = params["avatarUrl"] ?? "";
     let vrmUrl = params["vrmUrl"] ?? "";
     let isAnonymous = params["isAnonymous"] ?? true;

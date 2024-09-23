@@ -171,6 +171,10 @@ export class ColyseusGameRoom extends Room {
         throw new Error("Consented leave");
       }
 
+      if (this.clients.length == 0) {
+        throw new Error("No more clients");
+      }
+
       const reconnectTimeout = this._roomHandler._CALLBACKS_.disconnect(
         client.sessionId
       );
