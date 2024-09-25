@@ -114,6 +114,10 @@ export class ScriptFactory {
       dirname
     );
 
+    // const fn = new Function("exports", "require", opts.content);
+
+    // fn(opts.exports, opts.require);
+
     return opts.exports;
   }
 

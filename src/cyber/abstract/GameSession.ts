@@ -3,12 +3,10 @@ import { GameLoop } from "./GameLoop";
 import {
   PLAYER_ROLES,
   PlayerRole,
-  BaseRoomState,
   Messages,
   GameActions,
   ClientMessage,
   PlayerData,
-  PingMsg,
   PongMsg,
 } from "./types";
 import { RoomState } from "../schema/RoomState";
@@ -355,9 +353,11 @@ export abstract class GameSession<
       this.onUpdate(dt);
     },
 
+    autoInc: 100,
+
     beforePatch: () => {
       //
-      this.state.snapshotId = Math.random().toString(36).substring(2, 7);
+      this.state.snapshotId = "" + this._CALLBACKS_.autoInc++; //Math.random().toString(36).substring(2, 7);
       this.state.timestamp = Date.now();
     },
 
@@ -382,6 +382,7 @@ export abstract class GameSession<
         // this.logInfo("message", message, msg.type, msg.type == ClientProtocol.GAME_REQUEST)
         if (msg.type == Messages.PLAYER_STATE) {
           // player state message
+
           const [
             posX,
             posY,
@@ -395,13 +396,29 @@ export abstract class GameSession<
             text,
           ] = msg.data;
 
-          player.position.copy({
+          const pos = player.position;
+
+          let same = true;
+
+          this.state.players.forEach((p) => {
+            //
+            if (p.sessionId === player.sessionId) {
+              return;
+            }
+            if (p.position !== pos) {
+              same = false;
+            } else {
+              console.log("same position");
+            }
+          });
+
+          player.position.assign({
             x: posX ?? 0,
             y: posY ?? 0,
             z: posZ ?? 0,
           });
 
-          player.rotation.copy({
+          player.rotation.assign({
             x: rotX ?? 0,
             y: rotY ?? 0,
             z: rotZ ?? 0,
@@ -469,7 +486,7 @@ export abstract class GameSession<
       animation: "idle",
       latency: 0,
       jitter: 0,
-      plugins: "",
+      plugins: [],
     };
   }
 

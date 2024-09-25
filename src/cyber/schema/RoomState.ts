@@ -1,35 +1,31 @@
-import { Schema, type, MapSchema } from "@colyseus/schema";
-import { PlayerState } from "./PlayerState";
+import { PlayerEntity } from "./PlayerState";
 import { GameTimer } from "./GameTimer";
+import { Entity, P } from "./types";
 
-class RoomSettings extends Schema {
-  @type("number") reconnectTimeout = 0;
-  @type("number") patchRate = 20;
-  @type("number") tickRate = 20;
+class RoomSettings extends Entity {
+  reconnectTimeout = P.Number(0);
+  patchRate = P.Number(20);
+  tickRate = P.Number(20);
 }
 
-export class RoomState extends Schema {
+export class RoomState extends Entity {
   //
-  @type("string") snapshotId: string = null;
-  @type("number") timestamp: number = 0;
-  @type({ map: PlayerState }) players = new MapSchema<PlayerState>();
-
-  @type(GameTimer) timer: GameTimer = new GameTimer();
-
-  @type(RoomSettings) settings = new RoomSettings();
+  snapshotId = P.String("");
+  timestamp = P.Number(0);
+  players = P.Map(PlayerEntity);
+  timer = P.Object(GameTimer);
+  settings = P.Object(RoomSettings);
 
   addPlayer(data: any) {
-    const player = new PlayerState();
+    const player = new PlayerEntity();
     player.sessionId = data.sessionId;
     player.userId = data.userId ?? "anon";
     player.name = data.name ?? "Anonymous";
-    player.role = data.role;
-    player.latency = data.latency;
-    player.position.copy(data.position);
-    player.rotation.copy(data.rotation);
-    player.animation = data.animation;
+    player.role = data.role ?? "player";
+    player.position.assign(data.position ?? { x: 0, y: 0, z: 0 });
+    player.rotation.assign(data.rotation ?? { x: 0, y: 0, z: 0 });
+    player.animation = data.animation ?? "idle";
     player.text = data.text ?? "";
-    player.state = data.state ?? "";
 
     player.connected = true;
 
