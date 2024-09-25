@@ -36,9 +36,9 @@ export class ColyseusGameRoom extends Room {
     //
     this._roomHandler = handler;
 
-    this.setPatchRate(this._roomHandler.patchRate);
+    const patchRate = this._roomHandler.patchRate ?? 20; // 20 fps
 
-    console.log("Patch rate", this._roomHandler.patchRate);
+    this.setPatchRate(1000 / patchRate); // colyseus uses ms
 
     const state = this._roomHandler.state;
 

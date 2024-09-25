@@ -13,8 +13,8 @@ import { RoomState } from "../schema/RoomState";
 import { calcLatencyIPDTV } from "./utils";
 
 const defaults = {
-  PATCH_RATE: 1000 / 20, // 50ms, 20fps
-  TICK_RATE: 1000 / 30, // 33ms, 30fps
+  PATCH_RATE: 20, // fps
+  TICK_RATE: 20, // fps
 };
 
 export interface GameRoomCtx {
