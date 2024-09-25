@@ -2,7 +2,7 @@ import { PlayerEntity } from "./PlayerState";
 import { GameTimer } from "./GameTimer";
 import { Entity, P } from "./types";
 
-class RoomSettings extends Entity {
+export class RoomSettings extends Entity {
   reconnectTimeout = P.Number(0);
   patchRate = P.Number(20);
   tickRate = P.Number(20);

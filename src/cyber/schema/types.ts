@@ -257,7 +257,7 @@ export class Entity {
     // count++;
     // is parsing
     if (parseCtx.has(this.constructor)) {
-      console.error("Already parsing", this.constructor.name);
+      // console.error("Already parsing", this.constructor.name);
       // @ts-ignore
       return { [PARSE_OBJ]: true };
     }
@@ -355,8 +355,9 @@ function createSchema(info: EntityInfo) {
     const param = info.params[field];
     if (!isParam(param)) return;
     const ctype = getColysuesType(param);
-    console.log("createSchema", field, ctype);
+    // console.log("createSchema", field);
     type(ctype)(cSchema.prototype, field);
+    // console.log("createSchema", field, "done");
   });
 }
 

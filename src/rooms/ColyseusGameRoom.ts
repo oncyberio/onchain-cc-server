@@ -99,7 +99,7 @@ export class ColyseusGameRoom extends Room {
         throw new Error("Invalid request");
       }
 
-      let roomHandlerClass = null; //ScriptFactory.instance.init(opts.gameData);
+      let roomHandlerClass = ScriptFactory.instance.init(opts.gameData);
 
       let roomHandler;
 
