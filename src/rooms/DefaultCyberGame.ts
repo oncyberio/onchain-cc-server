@@ -6,6 +6,9 @@ export class DefaultCyberGame extends GameSession<RoomState> {
   //
   maxPlayers = 4;
 
+  tickRate = 1000 / 20;
+  patchRate = 1000 / 20;
+
   reconnectTimeout = 10000;
 
   state = new RoomState();

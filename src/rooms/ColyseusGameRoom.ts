@@ -38,6 +38,8 @@ export class ColyseusGameRoom extends Room {
 
     this.setPatchRate(this._roomHandler.patchRate);
 
+    console.log("Patch rate", this._roomHandler.patchRate);
+
     const state = this._roomHandler.state;
 
     if (!state?.$$cInst) {

@@ -34,9 +34,9 @@ export abstract class GameSession<
 
   readonly state: State;
 
-  readonly tickRate?: number;
+  readonly tickRate = defaults.TICK_RATE;
 
-  readonly patchRate?: number;
+  readonly patchRate = defaults.PATCH_RATE;
 
   readonly simulatedLatency?: number;
 
@@ -263,16 +263,15 @@ export abstract class GameSession<
    */
   _CALLBACKS_ = {
     start: async () => {
-      await this.onPreload();
-
+      //
       const tickRate = this.tickRate ?? defaults.TICK_RATE;
       const patchRate = this.patchRate ?? defaults.PATCH_RATE;
-
       this._gameLoop.tickRate = tickRate;
-
       this.state.settings.reconnectTimeout = this.reconnectTimeout;
       this.state.settings.tickRate = tickRate;
       this.state.settings.patchRate = patchRate;
+
+      await this.onPreload();
 
       if (typeof this.constructor.prototype.onUpdate === "function") {
         this._gameLoop.onTick = this._CALLBACKS_.tick;
@@ -353,12 +352,17 @@ export abstract class GameSession<
       this.onUpdate(dt);
     },
 
-    autoInc: 100,
+    prevTimestamp: Date.now(),
 
     beforePatch: () => {
       //
-      this.state.snapshotId = "" + this._CALLBACKS_.autoInc++; //Math.random().toString(36).substring(2, 7);
+      this.state.snapshotId = Math.random().toString(36).substring(2, 7);
       this.state.timestamp = Date.now();
+      // console.log(
+      //   "beforePatch",
+      //   this.state.timestamp - this._CALLBACKS_.prevTimestamp
+      // );
+      // this._CALLBACKS_.prevTimestamp = this.state.timestamp;
     },
 
     message: (message: any, sessionId: string) => {
