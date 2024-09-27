@@ -3,6 +3,7 @@ import { MapSchema } from "@colyseus/schema";
 class MapImpl<T> extends Map<string, T> {
   //
   $$cInst: MapSchema<T>;
+  $$entityType: any;
 
   constructor() {
     //
@@ -27,6 +28,8 @@ class MapImpl<T> extends Map<string, T> {
   }
 }
 
-export function createMap() {
-  return new MapImpl();
+export function createMap(entityType: any) {
+  const map = new MapImpl();
+  map.$$entityType = entityType;
+  return map;
 }

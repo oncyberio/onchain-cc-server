@@ -1,7 +1,7 @@
 import { PlayerRole } from "../abstract/types";
-import { Entity, P } from "./types";
+import { State, P } from "./types";
 
-export class PlayerEntity extends Entity {
+export class PlayerState extends State {
   //
   // synchronized
   sessionId = P.String("");

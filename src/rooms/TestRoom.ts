@@ -1,8 +1,8 @@
 import { Client, ClientArray, Room } from "colyseus";
-import { Entity, P } from "../cyber/schema/types";
+import { State, P } from "../cyber/schema/types";
 import { RoomState } from "../cyber/schema/RoomState";
 
-class Player extends Entity {
+class Player extends State {
   sessionId = P.String("");
   uid = P.String("");
   name = P.String("");
@@ -14,7 +14,7 @@ class Player extends Entity {
   }
 }
 
-class State extends RoomState {
+class MyState extends RoomState {
   pos = P.XYZ();
 }
 
@@ -22,11 +22,11 @@ class State extends RoomState {
 
 export class TestRoom extends Room {
   //
-  _state: State;
+  _state: MyState;
 
   onCreate(options: any): void | Promise<any> {
     console.log("TestRoom created!", options);
-    this._state = new State();
+    this._state = new MyState();
     this.setState(this._state.$$cInst);
 
     this.setSimulationInterval(() => {

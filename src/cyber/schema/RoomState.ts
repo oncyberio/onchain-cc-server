@@ -1,23 +1,36 @@
-import { PlayerEntity } from "./PlayerState";
+import { PlayerState } from "./PlayerState";
 import { GameTimer } from "./GameTimer";
-import { Entity, P } from "./types";
+import { State, P } from "./types";
 
-export class RoomSettings extends Entity {
+export class RoomSettings extends State {
   reconnectTimeout = P.Number(0);
   patchRate = P.Number(20);
   tickRate = P.Number(20);
 }
 
-export class RoomState extends Entity {
+export class RoomState extends State {
   //
   snapshotId = P.String("");
   timestamp = P.Number(0);
-  players = P.Map(PlayerEntity);
+  players = P.Map(PlayerState);
   timer = P.Object(GameTimer);
   settings = P.Object(RoomSettings);
 
   addPlayer(data: any) {
-    const player = new PlayerEntity();
+    //
+    if ((this.players as any).$$entityType == null) {
+      //
+      throw new Error("Invalid players property");
+    }
+
+    const psClass = (this.players as any).$$entityType;
+
+    if (!PlayerState.prototype.isPrototypeOf(psClass.prototype)) {
+      //
+      throw new Error("Invalid PlayerState class");
+    }
+
+    const player = new psClass();
     player.sessionId = data.sessionId;
     player.userId = data.userId ?? "anon";
     player.name = data.name ?? "Anonymous";

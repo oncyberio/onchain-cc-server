@@ -1,6 +1,6 @@
-import { Entity, P } from "./types";
+import { State, P } from "./types";
 
-export class GameTimer extends Entity {
+export class GameTimer extends State {
   genesisTime = P.Number(Date.now());
   gameStart = P.Number();
   elapsedSecs = P.Number(0);

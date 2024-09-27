@@ -1,5 +1,5 @@
 import { GameSession } from "../cyber";
-import { PlayerEntity } from "../cyber/schema/PlayerState";
+import { PlayerState } from "../cyber/schema/PlayerState";
 import { RoomState } from "../cyber/schema/RoomState";
 
 export class DefaultCyberGame extends GameSession<RoomState> {
@@ -31,7 +31,7 @@ export class DefaultCyberGame extends GameSession<RoomState> {
     console.log(player.sessionId, player.userId, "left!");
   }
 
-  onMessage(message: any, player: PlayerEntity): void {}
+  onMessage(message: any, player: PlayerState): void {}
 
   // onUpdate(dt: number): void {
   //   console.log("updating...");

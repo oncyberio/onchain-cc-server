@@ -37,7 +37,7 @@ function isParam(val: any): val is Param {
 
 function isEntityType(val: any) {
   return (
-    typeof val === "function" && Entity.prototype.isPrototypeOf(val.prototype)
+    typeof val === "function" && State.prototype.isPrototypeOf(val.prototype)
   );
 }
 
@@ -146,7 +146,7 @@ export class P {
       }
 
       entityType = schemaOrType;
-    } else if (schemaOrType instanceof Entity) {
+    } else if (schemaOrType instanceof State) {
       //
 
       entityType = schemaOrType.constructor as any;
@@ -226,7 +226,7 @@ function getParams(klass: Function) {
   Object.keys(inst).forEach((field) => {
     //
     let val = inst[field];
-    if (isEntityType(val) || val instanceof Entity) {
+    if (isEntityType(val) || val instanceof State) {
       val = P.Object(val);
     }
     if (!isParam(val)) return;
@@ -238,7 +238,7 @@ function getParams(klass: Function) {
 
 // let count = 0;
 
-export class Entity {
+export class State {
   //
   $$cInst: Schema;
 
@@ -259,7 +259,7 @@ export class Entity {
     if (parseCtx.has(this.constructor)) {
       // console.error("Already parsing", this.constructor.name);
       // @ts-ignore
-      return { [PARSE_OBJ]: true };
+      return;
     }
 
     let info = infoCache.get(this.constructor);
@@ -402,7 +402,7 @@ function getColysuesType(schema: Param) {
       //
     } else {
       //
-      const entityType = class ObjEntity extends Entity {};
+      const entityType = class ObjEntity extends State {};
 
       const info: EntityInfo = {
         cSchema: null,
@@ -472,19 +472,19 @@ function getDefValue(schema: Param) {
     //
   } else if (schema.type === "map") {
     //
-    return createMap();
+    return createMap(schema.itemType.entityType ?? null);
     //
   } else {
     throw new Error("Invalid schema type");
   }
 }
 
-export class Vec2 extends Entity {
+export class Vec2 extends State {
   x = P.Number(0);
   y = P.Number(0);
 }
 
-export class Vec3 extends Entity {
+export class Vec3 extends State {
   x = P.Number(0);
   y = P.Number(0);
   z = P.Number(0);
