@@ -1,15 +1,9 @@
-import { GameSession, RoomState, PlayerState, XYZ } from "../";
+import * as serverEnv from "../";
 
 import * as ColyseusSchema from "@colyseus/schema";
 import vm from "node:vm";
 import path from "node:path";
 import { ScriptData } from "./ScriptData";
-
-const serverEnv = {
-  GameSession,
-  RoomState,
-  PlayerState,
-};
 
 const libsNS = {
   OO_SERVER: "@oo/server",
@@ -54,7 +48,9 @@ export class ScriptFactory {
 
     let klass = exports.default;
 
-    const isServerClass = GameSession.prototype.isPrototypeOf(klass?.prototype);
+    const isServerClass = serverEnv.GameSession.prototype.isPrototypeOf(
+      klass?.prototype
+    );
 
     if (!isServerClass) {
       console.error(
@@ -113,6 +109,10 @@ export class ScriptFactory {
       scriptPath,
       dirname
     );
+
+    // const fn = new Function("exports", "require", opts.content);
+
+    // fn(opts.exports, opts.require);
 
     return opts.exports;
   }

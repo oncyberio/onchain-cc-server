@@ -36,9 +36,18 @@ export class ColyseusGameRoom extends Room {
     //
     this._roomHandler = handler;
 
-    this.setPatchRate(this._roomHandler.patchRate);
+    const patchRate = this._roomHandler.patchRate ?? 20; // 20 fps
 
-    this.setState(this._roomHandler.state);
+    this.setPatchRate(1000 / patchRate); // colyseus uses ms
+
+    const state = this._roomHandler.state;
+
+    if (!state?.$$cInst) {
+      //
+      throw new Error("Invalid state");
+    }
+
+    this.setState(state.$$cInst);
 
     this.maxClients = Math.min(
       this._roomHandler.maxPlayers ?? defaults.MAX_PLAYERS,
@@ -138,9 +147,9 @@ export class ColyseusGameRoom extends Room {
   }
   */
 
-  onBeforePatch(state: any) {
+  onBeforePatch() {
     //
-    this._roomHandler?._CALLBACKS_.beforePatch(state);
+    this._roomHandler?._CALLBACKS_.beforePatch();
   }
 
   async onJoin(client: Client, options: any, auth: any) {

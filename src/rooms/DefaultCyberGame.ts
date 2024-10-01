@@ -1,10 +1,16 @@
-import { RoomState, GameSession, PlayerState } from "../cyber";
+import { GameSession } from "../cyber";
+import { PlayerState } from "../cyber/schema/PlayerState";
+import { RoomState } from "../cyber/schema/RoomState";
 
 export class DefaultCyberGame extends GameSession<RoomState> {
   //
   maxPlayers = 4;
 
-  reconnectTimeout = 10000;
+  // fps
+  tickRate = 20;
+  patchRate = 20;
+
+  reconnectTimeout = 0;
 
   state = new RoomState();
 
