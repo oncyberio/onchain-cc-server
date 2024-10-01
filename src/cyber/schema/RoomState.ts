@@ -25,7 +25,12 @@ export class RoomState extends State {
 
     const psClass = (this.players as any).$$entityType;
 
-    if (!PlayerState.prototype.isPrototypeOf(psClass.prototype)) {
+    console.log("psClass", psClass);
+
+    if (
+      !PlayerState.prototype.isPrototypeOf(psClass.prototype) &&
+      psClass !== PlayerState
+    ) {
       //
       throw new Error("Invalid PlayerState class");
     }
