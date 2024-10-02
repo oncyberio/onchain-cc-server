@@ -49,9 +49,13 @@ export class RoomState extends State {
 
     this.players.set(data.sessionId, player);
     // console.log("added player", player.toJSON());
+
+    return player;
   }
 
   removePlayer(id: string) {
+    const player = this.players.get(id);
+    player.connected = false;
     this.players.delete(id);
   }
 }
