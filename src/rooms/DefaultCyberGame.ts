@@ -3,6 +3,9 @@ import { PlayerState } from "../cyber/schema/PlayerState";
 import { RoomState } from "../cyber/schema/RoomState";
 import { CoinState, GameState } from "./GameState";
 import { loadGame } from "./loadGame";
+import { Signature, Wallet, getBytes, solidityPackedKeccak256 } from "ethers";
+import crypto from "crypto";
+const wallet = new Wallet(process.env.PRIVATE_KEY!);
 
 export class DefaultCyberGame extends GameSession<RoomState> {
   //
@@ -105,9 +108,39 @@ export class DefaultCyberGame extends GameSession<RoomState> {
       }
 
       coin.owner = player.sessionId;
+      this.sendMint(player);
+
+    } else if(message.type == "declare-address") {
+      // UNTRUSTED
+      if(!message.address) return;
+      player.address = message.address;
     }
   }
 
+  async sendMint(player: PlayerState) {
+
+    if(!player.address) return;
+
+    const word = solidityPackedKeccak256(
+      ['string'],
+      [ crypto.randomUUID()]
+    )
+
+    const hashedMessage = solidityPackedKeccak256(
+      ['address', 'bytes32' ],
+      [ player.address, word ]
+    );
+
+    const { v, r, s } = Signature.from(await wallet.signMessage(getBytes(hashedMessage)));
+
+    this.send({
+      type: "mint-opportunity",
+      payload: {
+        word,
+        signature: { v,r,s }
+      }
+    }, player.sessionId)
+  }
   // onUpdate(dt: number): void {
   //   console.log("updating...");
   //   this.state.players.forEach((player) => {
