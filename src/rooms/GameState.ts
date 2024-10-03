@@ -21,5 +21,6 @@ export class GameState extends RoomState {
   addPlayer(data: any): void {
     const player = super.addPlayer(data);
     this.scores.set(player.sessionId, 0);
+    return player;
   }
 }
