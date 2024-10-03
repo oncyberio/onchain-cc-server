@@ -7,7 +7,7 @@ import { loadGame } from "./loadGame";
 import { Signature, Wallet, getBytes, solidityPackedKeccak256 } from "ethers";
 import crypto from "crypto";
 const wallet = new Wallet(process.env.PRIVATE_KEY!);
-import { PlayerControls } from "./PlayerControls";
+import { ServerSpace } from "./ServerSpace";
 
 export class DefaultCyberGame extends GameSession<RoomState> {
   //
@@ -21,62 +21,11 @@ export class DefaultCyberGame extends GameSession<RoomState> {
 
   state = new GameState();
 
-  engine = null;
-  space = null;
-  coinModel = null;
-  playerModel = null;
-
-  playerController = new PlayerControls();
+  // serverSpace = new ServerSpace();
 
   async onPreload() {
     console.log("Preloading...");
-    this.engine = await loadGame(this.gameId, {
-      debugPhysics: true,
-      filter: (component: any) => {
-        return (
-          component.collider?.enabled ||
-          component.script?.identifier === "coin" ||
-          component.name == "PlayerControls"
-        );
-      },
-    });
-    this.space = this.engine.getCurrentSpace();
-    this.coinModel = this.space.components.byId("coin");
-    const playerModel = this.space.components.byId("playerModel");
-
-    console.log("Coin model", this.coinModel.getDimensions());
-    console.log(
-      "Player model",
-      playerModel.getDimensions(),
-      playerModel.behaviors.map((b) => b.name)
-    );
-    const coins = await this.spawnCoins(10);
-    this.playerController.init(this.space, playerModel, coins);
-  }
-
-  spawnCoins(nb: number) {
-    let promises = [];
-    for (let i = 0; i < nb; i++) {
-      const coin = new CoinState();
-      coin.id = Math.random().toString();
-      coin.position.x = Math.random() * 100 - 5;
-      coin.position.y = 0.5;
-      coin.position.z = Math.random() * 100 - 5;
-      this.state.coins.set(coin.id, coin);
-      //
-      promises.push(this._addCoin(coin.id, coin));
-    }
-
-    return Promise.all(promises);
-  }
-
-  async _addCoin(id, val) {
-    const inst = await this.coinModel.duplicate();
-    inst.position.copy(val.position);
-    inst.rotation.y = val.rotation.y;
-    inst.visible = true;
-    inst.userData.coinId = id;
-    return inst;
+    // await this.serverSpace.init(this.gameId, this.state);
   }
 
   static onAuth(token: any, request: any): Promise<void> {
@@ -86,17 +35,12 @@ export class DefaultCyberGame extends GameSession<RoomState> {
 
   async onJoin(player) {
     console.log(player.sessionId, player.userId, "joined!");
-    if (this.space == null) {
-      console.error("Space not loaded!");
-      return;
-    }
-
-    this.playerController.addPlayer(player);
+    // this.serverSpace.onJoin(player);
   }
 
   onLeave(player) {
     console.log(player.sessionId, player.userId, "left!");
-    this.playerController.removePlayer(player);
+    // this.serverSpace.onLeave(player);
   }
 
   onMessage(message: any, player: PlayerState): void {
@@ -150,23 +94,23 @@ export class DefaultCyberGame extends GameSession<RoomState> {
   }
   onPlayerStateMsg(player: PlayerData, extra: any): void {
     //
-    const inputs = extra;
-    if (!inputs) {
-      return;
-    }
-
-    this.playerController.validatePosition(player, inputs);
+    // const inputs = extra;
+    // if (!inputs) {
+    //   return;
+    // }
+    // this.serverSpace.onPlayerInput(player, inputs);
   }
 
   onRpc(request: any, reply: (data: any) => void): void {
     //
     console.log("RPC received", request);
+
     if (request.type === "testRpc") {
       reply({ message: "Hello from server!" });
     } else if (request.type === "debugPhysics") {
-      this.space.physics.updateDebug();
-      const data = this.space.physics.debugLines.toJSON();
-      reply(data);
+      // reply(this.serverSpace.getPhysicsDebug());
+    } else if (request.type === "ccLogs") {
+      // return reply(this.serverSpace.getLogs(request.sessionId));
     } else {
       reply({ message: "Invalid request" });
     }
