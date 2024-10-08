@@ -25,6 +25,8 @@ export class DefaultCyberGame extends GameSession<RoomState> {
 
   async onPreload() {
     console.log("Preloading...");
+    this.spawnCoins(10);
+    
     // await this.serverSpace.init(this.gameId, this.state);
   }
 
@@ -99,6 +101,17 @@ export class DefaultCyberGame extends GameSession<RoomState> {
     //   return;
     // }
     // this.serverSpace.onPlayerInput(player, inputs);
+  }
+
+  spawnCoins(nb: number) {
+    for (let i = 0; i < nb; i++) {
+      const coin = new CoinState();
+      coin.id = Math.random().toString();
+      coin.position.x = Math.random() * 100 - 5;
+      coin.position.y = 0.5;
+      coin.position.z = Math.random() * 100 - 5;
+      this.state.coins.set(coin.id, coin);
+    }
   }
 
   onRpc(request: any, reply: (data: any) => void): void {
