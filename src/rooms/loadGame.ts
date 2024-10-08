@@ -1,4 +1,4 @@
-import { GameLoader } from "game-server-colyseus";
+// import { GameLoader } from "game-server-colyseus";
 // import * as RAPIER from "@dimforge/rapier3d-compat";
 
 const builtinExcludes = {
@@ -29,15 +29,16 @@ const defOptions = {
 
 export async function loadGame(gameId, opts: Partial<LoadGameOptions> = {}) {
   //
-  console.log("Loading game space");
+  return null;
+//   console.log("Loading game space");
 
-  opts = Object.assign({}, defOptions, opts);
+//   opts = Object.assign({}, defOptions, opts);
 
-  const loader = new GameLoader();
+//   const loader = new GameLoader();
 
-  const engine = await loader.loadGame(gameId, opts);
+//   const engine = await loader.loadGame(gameId, opts);
 
-  console.log("Game space created");
+//   console.log("Game space created");
 
-  return engine;
+//   return engine;
 }
